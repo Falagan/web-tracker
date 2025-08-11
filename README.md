@@ -67,11 +67,14 @@ Don't solve the data access concurrency problem using an external library
 
 ### Vertical Slicing
 - `cmd` > app shell to expose features. In this case a Basic HTTP Server
-- `internal` > features
-- `infra` > data repositories
+- `internal` 
+  - `domain` > core business
+  - `features` > explicit features
+  - `infra` > data repositories
+- root files
 
-### Main layers:
-- Common Base must-have:
+
+### Common Base 'must-have':
   - Envs
   - Debugger config
   - Logger
@@ -87,21 +90,31 @@ Don't solve the data access concurrency problem using an external library
 3. Thread-safe structures
 4. Memory limits/optimization
 
-## Extras to analyze convenience:
+### Extras to analyze convenience:
 1. TTL data strategy
 2. Cache strategies
 
-## Feature Development
+## Development
 
-### 1. Feature: Ingest web visitor events
+### 0. Setup base HTTP server
+
+### 1. Domain
+- Define Ingest entities
+- Define Analytics entities 
+  
+### 2. Infra: Repositories
+- Define track repository
+
+### 3. Feature: Ingest web visitor events
 - POST endpoint to receive events
 - Request Mapper
 - Request Validation
 - In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
 - Response Mapper
 - Proper Errors Handling
+- Unit Test
 
-### 2. Feature: Serve data about unique visitors by URL
+### 4. Feature: Serve data about unique visitors by URL
 - GET endpoint for analytics queries
 - Request Mapper
 - Request/Query Validation
@@ -109,3 +122,6 @@ Don't solve the data access concurrency problem using an external library
 - In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
 - Response Mapper with structured JSON responses
 - Proper Errors Handling
+- Unit Test
+
+### 5. Add extra features to HTTP Server
