@@ -28,3 +28,84 @@ There is no need for persistence to a database. Everything can be kept in memory
 The web service must be capable of handling concurrent requests on both
 endpoints.
 Don't solve the data access concurrency problem using an external library
+
+----
+
+# HightLevel Plan
+
+## 1. Analysis
+
+1. **Understand the problem**
+2. **Define required features and constrains**
+3. **Analyze different solutions for each feature**
+4. **Select solution based on requirements and balancing results vs trade-offs**
+5. **Select best fit architecture**
+
+## 2. Scaffolding
+
+- **Define go module** and base main hello world
+
+- **Setup Makefile** for basic commands:
+  - Run: Locally/Dev env/Production.
+  - Test: ensure code compliance.
+  - Build: Production build optimization.
+  - Lint: Ensure code quality.
+  - Performance: local performace Analysis
+
+- **Implement base architecture**
+
+## 3. Feature Development
+
+1. **Feature: Ingest web visitor events**
+
+2. **Feature: Serve data about unique visitors by URL**
+
+----
+# LowLevel Plan
+
+## Architecture
+
+### Vertical Slicing
+- `cmd` > app shell to expose features. In this case a Basic HTTP Server
+- `internal` > features
+- `infra` > data repositories
+
+### Main layers:
+- Common Base must-have:
+  - Envs
+  - Debugger config
+  - Logger
+  - Health Check
+  - Context Global Timeout
+  - Graceful shutdown
+  - Rate limit
+  - HTTPS
+
+## Constraints
+1. Concurrency support
+2. In memory storage
+3. Thread-safe structures
+4. Memory limits/optimization
+
+## Extras to analyze convenience:
+1. TTL data strategy
+2. Cache strategies
+
+## Feature Development
+
+### 1. Feature: Ingest web visitor events
+- POST endpoint to receive events
+- Request Mapper
+- Request Validation
+- In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
+- Response Mapper
+- Proper Errors Handling
+
+### 2. Feature: Serve data about unique visitors by URL
+- GET endpoint for analytics queries
+- Request Mapper
+- Request/Query Validation
+- Params query support
+- In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
+- Response Mapper with structured JSON responses
+- Proper Errors Handling
