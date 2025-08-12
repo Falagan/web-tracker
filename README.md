@@ -46,8 +46,6 @@ Don't solve the data access concurrency problem using an external library
 - **Feature 1**: Ingest visitor events via REST endpoint
 - **Feature 2**: Query unique visitors analytics via REST endpoint in JSON format
 
-## 2. REST API + Memory Storage Solution
-
 ### Event Ingestion
 **Endpoint**: `POST /api/events`
 ```json
