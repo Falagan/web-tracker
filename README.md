@@ -31,9 +31,7 @@ Don't solve the data access concurrency problem using an external library
 
 ----
 
-# Implementation Plan
-
-# Web Tracker - Development Plan
+# Web Tracker - Plan
 
 ## 1. Problem Analysis
 
