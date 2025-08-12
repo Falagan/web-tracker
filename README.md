@@ -31,97 +31,149 @@ Don't solve the data access concurrency problem using an external library
 
 ----
 
-# HightLevel Plan
+# Implementation Plan
 
-## 1. Analysis
+# Web Tracker - Development Plan
 
-1. **Understand the problem**
-2. **Define required features and constrains**
-3. **Analyze different solutions for each feature**
-4. **Select solution based on requirements and balancing results vs trade-offs**
-5. **Select best fit architecture**
+## 1. Problem Analysis
 
-## 2. Scaffolding
+### Core Problem
+- REST API to track web visitor events
+- Serve unique visitors analytics by URL
+- In-memory storage with concurrency support
 
-- **Define go module** and base main hello world
+### Features
+- **Feature 1**: Ingest visitor events via REST endpoint
+- **Feature 2**: Query unique visitors analytics via REST endpoint in JSON format
 
-- **Setup Makefile** for basic commands:
-  - Run: Locally/Dev env/Production.
-  - Test: ensure code compliance.
-  - Build: Production build optimization.
-  - Lint: Ensure code quality.
-  - Performance: local performace Analysis
+## 2. REST API + Memory Storage Solution
 
-- **Implement base architecture**
+### Event Ingestion
+**Endpoint**: `POST /api/events`
+```json
+{
+  "uid": "uuid-visitor",
+  "url": "https://example.com/page"
+}
+```
 
-## 3. Feature Development
+### Analytics Query
+**Endpoint**: `GET /api/unique-visitors?url=https://example.com/page`
+```json
+{
+  "url": "https://example.com/page",
+  "unique_visitors": 1250
+}
+```
 
-1. **Feature: Ingest web visitor events**
+## 3. Technical Constraints
 
-2. **Feature: Serve data about unique visitors by URL**
+- HTTP Server REST
+- In-memory storage
+- Concurrency support
+- Thread-safe structures
+- No external libs on concurrency data access
 
-----
-# LowLevel Plan
+## 4. Technology Stack
 
-## Architecture
+- **Go 1.24**: Performance + concurrency
+- **gorilla/mux**: REST routing
+- **Memory**: sync.Map, sync.RWMux for thread-safe storage
+- **testify**: Unit testing
 
-### Vertical Slicing
-- `cmd` > app shell to expose features. In this case a Basic HTTP Server
-- `internal` 
-  - `domain` > core business
-  - `features` > explicit features
-  - `infra` > data repositories
-- root files
+## 5. Architecture
 
+### Memory Store Design
 
-### Common Base 'must-have':
-  - Envs
-  - Debugger config
-  - Logger
-  - Health Check
-  - Context Global Timeout
-  - Graceful shutdown
-  - Rate limit
-  - HTTPS
-
-## Constraints
-1. Concurrency support
-2. In memory storage
-3. Thread-safe structures
-4. Memory limits/optimization
-
-### Extras to analyze convenience:
-1. TTL data strategy
-2. Cache strategies
-
-## Development
-
-### 0. Setup base HTTP server
-
-### 1. Domain
-- Define Ingest entities
-- Define Analytics entities 
+- Possible solutions:
   
-### 2. Infra: Repositories
-- Define track repository
+  1. Map storage
+  2. Bloom filters
 
-### 3. Feature: Ingest web visitor events
-- POST endpoint to receive events
-- Request Mapper
-- Request Validation
-- In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
-- Response Mapper
-- Proper Errors Handling
-- Unit Test
+### Project Structure: Vertical Slicing aproach
+```
+cmd/
+├── envs
+├── http-server
+├── main.go
+internal/
+├── domain/
+│   ├── visitor-event.go
+│   ├── visitor-analytic.go
+│   └── visitor-repository.go
+├── features/
+│   ├── ingest-visitors-events/
+│   │   └── controller.go
+│   │   └── mapper.go
+│   │   └── validator.go
+│   │   └── command.go
+│   └── get-visitors-analytics/
+│       └── controller.go
+│       └── mapper.go
+│       └── validator.go
+│       └── query.go
+├── infra/
+│   └── in-memory/
+│       └── visitor-repository.go
+Makefile
+README.md 
+...
+```
 
-### 4. Feature: Serve data about unique visitors by URL
-- GET endpoint for analytics queries
-- Request Mapper
-- Request/Query Validation
-- Params query support
-- In-memory storage with thread-safe structures (sync.Map/sync.RWMux)
-- Response Mapper with structured JSON responses
-- Proper Errors Handling
-- Unit Test
+## 6. Implementation Plan
 
-### 5. Add extra features to HTTP Server
+### Phase 0: Base Setup
+- Go module + Makefile
+- Basic HTTP server with gorilla/mux
+- Health check endpoint
+- 
+### Phase 1: Domain
+- visitors event
+- visitors analytic
+- visitors repository
+
+### Phase 2: Events API
+- `POST /web-tracker/new-visitor` controller
+- mapper
+- validator
+- command
+- command-handler
+- test
+
+### Phase 3: Analytics API
+- `GET /web-tracker/analytics` controller
+- mapper
+- validator
+- query
+- query-handler
+- test
+
+### Phase 4: In-Memory repository
+- add unique visitor
+- is unique visitor
+- get analytics 
+- test
+
+### Phase 4: Production Ready
+- Rate limiting config
+- Graceful shutdown
+- Performance optimization
+
+## API Endpoints
+```
+POST   /web-tracker/new-visitor
+GET    /web-tracker/analytics
+GET    /health
+```
+## Makefile Commands
+```makefile
+run:    # Run locally
+test:   # Unit tests + coverage
+build:  # Production build
+lint:   # Code quality checks
+performace: # Performance measurements
+```
+## Future Improvements
+- TTL strategy for old events cleanup
+- Open-api specification
+- Docker contenerization
