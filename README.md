@@ -74,6 +74,7 @@ Don't solve the data access concurrency problem using an external library
 
 - **Go 1.24**: Performance + concurrency
 - **gorilla/mux**: REST routing
+- **air**: server hot-reload
 - **Memory**: sync.Map, sync.RWMux for thread-safe storage
 - **testify**: Unit testing
 
@@ -163,8 +164,8 @@ GET    /health
 ```
 ## Makefile Commands
 ```makefile
-run:    # Run locally
-test:   # Unit tests + coverage
+run:    # Run locally options
+test:   # Unit tests + coverage options
 build:  # Production build
 lint:   # Code quality checks
 performace: # Performance measurements
