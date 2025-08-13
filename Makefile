@@ -108,7 +108,6 @@ commit: audit-soft
 
 ## push: push changes to the remote Git repository
 .PHONY: push
-push:
+push: audit
 	@echo -e "[PUSH] Git push..."
-	$(MAKE) audit
 	git push
