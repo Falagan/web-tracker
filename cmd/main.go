@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	_ "net/http/pprof"
+)
 
 func main() {
 	fmt.Print("Hello People")
