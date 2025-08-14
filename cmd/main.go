@@ -5,6 +5,7 @@ import (
 
 	_ "net/http/pprof"
 
+	"github.com/Falagan/web-tracker/cmd/envs"
 	httpserver "github.com/Falagan/web-tracker/cmd/http-server"
 	"github.com/Falagan/web-tracker/infra"
 	getvisitoranalytics "github.com/Falagan/web-tracker/internal/features/get-visitor-analytics"
@@ -14,18 +15,21 @@ import (
 
 func main() {
 
+	env := envs.NewEnv()
+
 	visitorRepository := infra.NewVisitorRepositoryInMemory()
 	analiticRepository := infra.NewAnalyticRepositoryInMemory()
 
 	config := &httpserver.HTTPServerConfig{
-		Address:            "0.0.0.0",
-		Port:               4001,
+		Address:            env.ServerAddress,
+		Port:               env.ServerPort,
 		ReadTimeout:        time.Second * 30,
 		WriteTimeout:       time.Second * 30,
 		IdleTimeout:        time.Second * 30,
 		VisitorRepository:  visitorRepository,
 		AnalyticRepository: analiticRepository,
 		Observer:           pkg.NewConsoleObserver(),
+		Env:                env.AppEnv,
 	}
 
 	server := httpserver.NewHTTPServer(config)
