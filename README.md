@@ -88,6 +88,10 @@ Don't solve the data access concurrency problem using an external library
   2. Bloom filters
 
 ### Project Structure: Vertical Slicing aproach
+
+![alt text](image.png)
+
+ In this case we shre the domain and infra layer across the fetures. 
 ```
 cmd/
 ├── envs
@@ -175,25 +179,39 @@ performace: # Performance measurements
 - Open-api specification
 - Docker contenerization
 
-## Final Decisions
+# FINAL DECISIONS
 
-# Repository Strategies In-Memory Map vs In-Memory Bloom filters
+## Repository Strategy: In-Memory Map vs Bloom Filters
 
+| Factor | Bloom Filter | Regular Map |
+|--------|-------------|-------------|
+| **Memory** | 1MB | 50MB+ |
+| **Accuracy** | 99% | 100% |
+| **Speed** | Ultra Fast | Fast |
 
-| Aspect | Bloom Filter | Regular Map |
-|---------|-------------|-------------|
-| **Memory Usage** | Very low (1MB) | High (50MB+) |
-| **Accuracy** | 99% correct | 100% correct |
-| **Speed** | Very fast | Fast |
-| **Precision** | Configurable but theres a errro rate  | 100% precise
+## Decision Matrix
 
-## When to use each?
+**Use Regular Map when:**
+- Small scale (< 500K users)
+- Zero errors required (banking, medical)
+- Need 100% precision
 
-| If you have... | Use this | Because... |
-|----------------|----------|------------|
-| **Few users** (< 500K) | Regular Map | It's exact and doesn't use much memory |
-| **Millions of users** | Bloom Filter | Uses little memory always |
-| **Need to be 100% sure** | Regular Map | Never makes mistakes |
-| **1% error is okay** | Bloom Filter | Saves lots of memory |
-| **Server with little memory** | Bloom Filter | Won't run out of memory |
-| **Banking/medical system** | Regular Map | Zero errors allowed |
+**Use Bloom Filter when:**
+- High scale (millions of users)
+- 1% error acceptable
+- Memory constraints
+
+## Architecture
+
+Strategy pattern enables runtime switching between implementations. Map strategy includes TTL for data rotation.
+
+## Testing
+
+Builder pattern test suite implemented for visitor repository. Limited coverage due to time constraints.
+
+## **FINAL RECOMMENDATION**
+
+1. **Start with Regular Map** for reliability
+2. **Monitor** memory and performance 
+3. **Switch to Bloom Filter** at scale
+4. **Implement TTL** for optimization in Map Strategy
