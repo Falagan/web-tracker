@@ -35,9 +35,10 @@ func (c *IngestVisitorController) handler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = c.Validator.ValidateRequest(request)
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	validationErrors := c.Validator.ValidateRequest(request)
+	if validationErrors != nil {
+		lastError := validationErrors[len(validationErrors)-1]
+		w.Write([]byte(lastError.Error()))
 		return
 	}
 
