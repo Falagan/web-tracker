@@ -23,10 +23,10 @@ func (e *Error) Error() string {
 
 // ErrorCode unwraps an application error and returns its code.
 func ErrorCode(err error) string {
-	var e Error
+	var e *Error
 	if err == nil {
 		return ""
-	} else if errors.As(err, e) {
+	} else if errors.As(err, &e) {
 		return e.Code
 	}
 	return EINTERNAL
@@ -37,7 +37,7 @@ func ErrorMessage(err error) string {
 	var e *Error
 	if err == nil {
 		return ""
-	} else if errors.As(err, e) {
+	} else if errors.As(err, &e) {
 		return e.Message
 	}
 	return EINTERNAL
