@@ -11,7 +11,7 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:4001
     description: Local development server
   - url: https://api.webtracker.com
     description: Production server

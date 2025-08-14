@@ -1,21 +1,26 @@
 package httpserver
 
 import (
+	_ "embed"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/Falagan/web-tracker/internal/domain"
+	"github.com/Falagan/web-tracker/pkg"
 	"github.com/gorilla/mux"
 )
+
+//go:embed openapi.yaml
+var openAPISpec []byte
 
 type HTTPServer struct {
 	Server             *http.Server
 	Router             *mux.Router
 	VisitorRepository  domain.VisitorRepository
 	AnalyticRepository domain.AnalyticRepository
+	Observer           pkg.Observer
 }
 
 type HTTPServerConfig struct {
@@ -26,6 +31,7 @@ type HTTPServerConfig struct {
 	IdleTimeout        time.Duration
 	VisitorRepository  domain.VisitorRepository
 	AnalyticRepository domain.AnalyticRepository
+	Observer           pkg.Observer
 }
 
 func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
@@ -41,6 +47,7 @@ func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
 		Router:             router,
 		VisitorRepository:  sc.VisitorRepository,
 		AnalyticRepository: sc.AnalyticRepository,
+		Observer:           sc.Observer,
 	}
 	return server
 }
@@ -49,13 +56,13 @@ func (s *HTTPServer) StartHTTPServerAsync() {
 	go func() {
 		err := s.startHTTPServer()
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to start server: %v", err)
+			s.Observer.Log(pkg.LogLevelError, "Failed to start server")
 		}
 	}()
 }
 
 func (s *HTTPServer) startHTTPServer() error {
-	log.Println("Starting server at " + s.Server.Addr)
+	s.Observer.Log(pkg.LogLevelInfo, "Starting server at "+s.Server.Addr)
 	return s.Server.ListenAndServe()
 }
 
@@ -68,8 +75,22 @@ func (s *HTTPServer) WithHealthCheck() {
 			"status": "healthy",
 			"time":   time.Now().Format(time.DateTime),
 		})
-		log.Println("Checking server health")
+		s.Observer.Log(pkg.LogLevelInfo, "Checking server health")
 	}
 	// endpoint
 	s.Router.HandleFunc("/health", healthHandler).Methods("GET")
+}
+
+func (s *HTTPServer) WithOpenApi() {
+	// serve docs
+	s.Router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(OpenApiHTML))
+	}).Methods("GET")
+
+	// serve open api spec
+	s.Router.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml")
+		w.Write(openAPISpec)
+	})
 }

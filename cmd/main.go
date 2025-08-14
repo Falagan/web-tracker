@@ -9,6 +9,7 @@ import (
 	"github.com/Falagan/web-tracker/infra"
 	getvisitoranalytics "github.com/Falagan/web-tracker/internal/features/get-visitor-analytics"
 	ingestvisitor "github.com/Falagan/web-tracker/internal/features/ingest-visitor"
+	"github.com/Falagan/web-tracker/pkg"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 		IdleTimeout:        time.Second * 30,
 		VisitorRepository:  visitorRepository,
 		AnalyticRepository: analiticRepository,
+		Observer:           pkg.NewConsoleObserver(),
 	}
 
 	server := httpserver.NewHTTPServer(config)
@@ -35,6 +37,7 @@ func main() {
 	getVisitorAnalyticsController.MapEndpoint()
 
 	server.WithHealthCheck()
+	server.WithOpenApi()
 	server.StartHTTPServerAsync()
 
 	select {}
