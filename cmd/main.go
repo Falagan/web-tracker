@@ -39,6 +39,5 @@ func main() {
 	server.WithHealthCheck()
 	server.WithOpenAPI()
 	server.StartHTTPServerAsync()
-
-	select {}
+	server.WithShutdownGracefully()
 }

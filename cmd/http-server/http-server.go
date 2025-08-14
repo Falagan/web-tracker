@@ -1,10 +1,14 @@
 package httpserver
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/Falagan/web-tracker/internal/domain"
@@ -93,4 +97,22 @@ func (s *HTTPServer) WithOpenAPI() {
 		w.Header().Set("Content-Type", "application/yaml")
 		w.Write(openAPISpec)
 	})
+}
+
+func (s *HTTPServer) WithShutdownGracefully() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	s.Observer.Log(pkg.LogLevelInfo, "Stopping server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := s.Server.Shutdown(ctx)
+	if err != nil {
+		s.Observer.Log(pkg.LogLevelError, "Server shutdown failed")
+	}
+
+	s.Observer.Log(pkg.LogLevelInfo, "Server stopped gracefully")
 }
