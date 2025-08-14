@@ -7,20 +7,25 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Falagan/web-tracker/internal/domain"
 	"github.com/gorilla/mux"
 )
 
 type HTTPServer struct {
-	Server *http.Server
-	Router *mux.Router
+	Server             *http.Server
+	Router             *mux.Router
+	VisitorRepository  domain.VisitorRepository
+	AnalyticRepository domain.AnalyticRepository
 }
 
 type HTTPServerConfig struct {
-	Address      string
-	Port         int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	IdleTimeout  time.Duration
+	Address            string
+	Port               int
+	ReadTimeout        time.Duration
+	WriteTimeout       time.Duration
+	IdleTimeout        time.Duration
+	VisitorRepository  domain.VisitorRepository
+	AnalyticRepository domain.AnalyticRepository
 }
 
 func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
@@ -33,7 +38,9 @@ func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
 			WriteTimeout: sc.WriteTimeout,
 			IdleTimeout:  sc.IdleTimeout,
 		},
-		Router: router,
+		Router:             router,
+		VisitorRepository:  sc.VisitorRepository,
+		AnalyticRepository: sc.AnalyticRepository,
 	}
 	return server
 }
