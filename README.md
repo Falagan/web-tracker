@@ -174,3 +174,26 @@ performace: # Performance measurements
 - TTL strategy for old events cleanup
 - Open-api specification
 - Docker contenerization
+
+## Final Decisions
+
+# Repository Strategies In-Memory Map vs In-Memory Bloom filters
+
+
+| Aspect | Bloom Filter | Regular Map |
+|---------|-------------|-------------|
+| **Memory Usage** | Very low (1MB) | High (50MB+) |
+| **Accuracy** | 99% correct | 100% correct |
+| **Speed** | Very fast | Fast |
+| **Precision** | Configurable but theres a errro rate  | 100% precise
+
+## When to use each?
+
+| If you have... | Use this | Because... |
+|----------------|----------|------------|
+| **Few users** (< 500K) | Regular Map | It's exact and doesn't use much memory |
+| **Millions of users** | Bloom Filter | Uses little memory always |
+| **Need to be 100% sure** | Regular Map | Never makes mistakes |
+| **1% error is okay** | Bloom Filter | Saves lots of memory |
+| **Server with little memory** | Bloom Filter | Won't run out of memory |
+| **Banking/medical system** | Regular Map | Zero errors allowed |
