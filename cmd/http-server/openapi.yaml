@@ -87,7 +87,7 @@ paths:
           examples:
             homepage:
               summary: Homepage analytics
-              value: "https://example.com/"
+              value: "https://example.com/ homepage"
             product_page:
               summary: Product page analytics  
               value: "https://example.com/products/item-123"
