@@ -35,8 +35,8 @@ func NewEnv() *Env {
 	}
 
 	return &Env{
-		AppEnv:        os.Getenv(WebTrackerAppEnvKey),
-		ServerAddress: os.Getenv(WebTrackerServerAddressKey),
+		AppEnv:        appEnv,
+		ServerAddress: serverAddress,
 		ServerPort:    port,
 	}
 }

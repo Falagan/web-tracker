@@ -7,7 +7,7 @@ type LogLevel struct {
 var (
 	LogLevelInfo  = LogLevel{name: "INFO"}
 	LogLevelWarn  = LogLevel{name: "WARNING"}
-	LogLevelError = LogLevel{name: "ERROr"}
+	LogLevelError = LogLevel{name: "ERROR"}
 )
 
 type Observer interface {
