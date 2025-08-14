@@ -7,6 +7,11 @@
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/main.go",
+      "env": {
+        "WEB_TRACKER_APP_ENV": "development",
+        "WEB_TRACKER_SERVER_ADDRESS": "0.0.0.0",
+        "WEB_TRACKER_SERVER_PORT": "4001",
+      },
       "args": []
     }
   ]
