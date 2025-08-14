@@ -29,5 +29,5 @@ func (vr *VisitorRepositoryInMemory) AddUnique(ctx context.Context, v *domain.Vi
 		return nil
 	}
 
-	return errors.New("Not unique")
+	return errors.New("not unique")
 }
