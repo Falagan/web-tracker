@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: Web Tracker API
+  description: API for tracking unique website visitors and retrieving analytics data
+  version: 1.0.0
+  contact:
+    name: Web Tracker Team
+    email: support@webtracker.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.webtracker.com
+    description: Production server
+
+paths:
+  /web-tracker/new-visitor:
+    post:
+      summary: Ingest a new unique visitor
+      description: |
+        Records a unique visitor for analytics tracking. If the visitor UID already exists, 
+        the request is idempotent. Also increments the visit count for the provided URL.
+      operationId: ingestVisitor
+      tags:
+        - Visitor Tracking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestVisitorRequest'
+            examples:
+              basic_visitor:
+                summary: Basic visitor ingestion
+                value:
+                  uid: "user_12345_session_abc"
+                  url: "https://example.com/homepage"
+              mobile_visitor:
+                summary: Mobile visitor
+                value:
+                  uid: "mobile_user_67890"
+                  url: "https://example.com/products/mobile-app"
+      responses:
+        '200':
+          description: Visitor successfully ingested
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "event ingested"
+        '400':
+          description: Invalid request - malformed JSON or validation errors
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Ingest Visitor invalid event"
+        '500':
+          description: Internal server error - failed to store visitor data
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Ingest Visitor can not be stored"
+
+  /web-tracker/analytics:
+    get:
+      summary: Get visitor analytics for a specific URL
+      description: |
+        Retrieves the total visit count for a specific URL. Returns 0 if the URL 
+        has never been visited.
+      operationId: getVisitorAnalytics
+      tags:
+        - Analytics
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: The URL to get analytics for
+          schema:
+            type: string
+            format: uri
+            minLength: 1
+          examples:
+            homepage:
+              summary: Homepage analytics
+              value: "https://example.com/"
+            product_page:
+              summary: Product page analytics  
+              value: "https://example.com/products/item-123"
+            blog_post:
+              summary: Blog post analytics
+              value: "https://blog.example.com/posts/how-to-track-visitors"
+      responses:
+        '200':
+          description: Analytics data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetVisitorAnalyticsResponse'
+              examples:
+                popular_page:
+                  summary: Popular page with many visits
+                  value:
+                    url: "https://example.com/homepage"
+                    count: 1247
+                new_page:
+                  summary: New page with few visits
+                  value:
+                    url: "https://example.com/new-feature"
+                    count: 3
+                zero_visits:
+                  summary: Page with no visits
+                  value:
+                    url: "https://example.com/unused-page"
+                    count: 0
+        '400':
+          description: Invalid request - missing or empty URL parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Get Analytics invalid URL"
+        '500':
+          description: Internal server error - failed to retrieve analytics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Analytics can not be retrieved"
+
+components:
+  schemas:
+    IngestVisitorRequest:
+      type: object
+      required:
+        - uid
+        - url
+      properties:
+        uid:
+          type: string
+          description: |
+            Unique identifier for the visitor. This should be consistent across 
+            sessions for the same user (e.g., user ID, device fingerprint, etc.)
+          minLength: 1
+          maxLength: 255
+          example: "user_12345_session_abc"
+        url:
+          type: string
+          format: uri
+          description: The URL that was visited
+          minLength: 1
+          maxLength: 2048
+          example: "https://example.com/homepage"
+      example:
+        uid: "user_12345_session_abc"
+        url: "https://example.com/homepage"
+
+    GetVisitorAnalyticsResponse:
+      type: object
+      required:
+        - url
+        - count
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The URL that was queried
+          example: "https://example.com/homepage"
+        count:
+          type: integer
+          minimum: 0
+          description: Total number of visits to this URL
+          example: 1247
+      example:
+        url: "https://example.com/homepage"
+        count: 1247
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code for programmatic handling
+          example: "EINGESTVISITORINVALIDEVENT"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Ingest Visitor invalid event"
+      example:
+        code: "EINGESTVISITORINVALIDEVENT"
+        message: "Ingest Visitor invalid event"
+
+  examples:
+    HighTrafficSite:
+      summary: High traffic website analytics
+      description: Example response for a popular website homepage
+      value:
+        url: "https://popular-site.com/"
+        count: 125847
+
+    EcommercePage:
+      summary: E-commerce product page
+      description: Analytics for a specific product page
+      value:
+        url: "https://shop.example.com/products/bestseller-item"
+        count: 3421
+
+    BlogPost:
+      summary: Blog post analytics
+      description: Visit count for a blog article
+      value:
+        url: "https://blog.example.com/2024/web-analytics-guide"
+        count: 892
+
+tags:
+  - name: Visitor Tracking
+    description: Operations for ingesting and tracking unique visitors
+  - name: Analytics
+    description: Operations for retrieving visitor analytics and statistics
+
+externalDocs:
+  description: Find out more about Web Tracker
+  url: https://github.com/example/web-tracker
