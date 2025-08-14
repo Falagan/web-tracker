@@ -24,7 +24,7 @@ func (qh *GetVisitorAnalyticsQueryHandler) handle(ctx context.Context, q *GetVis
 	count, err := qh.ar.GetVisitedURLCount(ctx, domain.URL(q.URL))
 
 	if err != nil {
-		return nil, &domain.AnalyticInvalidCountError
+		return nil, &domain.AnalyticNoData
 	}
 
 	return count, nil

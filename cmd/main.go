@@ -17,7 +17,7 @@ func main() {
 
 	env := envs.NewEnv()
 
-	visitorRepository := infra.NewVisitorRepositoryInMemory()
+	visitorRepository := infra.NewVisitorRepositoryInMemoryBloom(1000, 0.01)
 	analiticRepository := infra.NewAnalyticRepositoryInMemory()
 
 	config := &httpserver.HTTPServerConfig{
