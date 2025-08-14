@@ -1,6 +1,6 @@
 package getvisitoranalytics
 
-import "strings"
+import "github.com/Falagan/web-tracker/internal/domain"
 
 type GetVisitorAnalyticsValidator struct{}
 
@@ -8,13 +8,11 @@ func NewGetVisitorAnalyticsValidator() *GetVisitorAnalyticsValidator {
 	return &GetVisitorAnalyticsValidator{}
 }
 
-func (gvav *GetVisitorAnalyticsValidator) ValidateRequest(r *GetVisitorAnalyticsRequest) error {
-	if !validateURL(r.URL) {
-		return &InvalidURL
+func (v *GetVisitorAnalyticsValidator) ValidateRequest(r *GetVisitorAnalyticsRequest) error {
+	url := domain.URL(r.URL)
+	err := url.Validate()
+	if err != nil {
+		return err
 	}
 	return nil
-}
-
-func validateURL(url string) bool {
-	return len(strings.TrimSpace(url)) > 0
 }

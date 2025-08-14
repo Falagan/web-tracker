@@ -1,5 +1,9 @@
 package ingestvisitor
 
+import (
+	"github.com/Falagan/web-tracker/internal/domain"
+)
+
 type IngestVisitorValidator struct{}
 
 func NewIngestVisitorValidator() *IngestVisitorValidator {
@@ -9,8 +13,16 @@ func NewIngestVisitorValidator() *IngestVisitorValidator {
 func (v *IngestVisitorValidator) ValidateRequest(r *IngestVisitorRequest) []error {
 	validationErrors := []error{}
 
-	if !validateUID(r.UID) {
-		validationErrors = append(validationErrors, &InvalidUID)
+	uid := domain.UID(r.UID)
+	err := uid.Validate()
+	if err != nil {
+		validationErrors = append(validationErrors, err)
+	}
+
+	url := domain.URL(r.URL)
+	err = url.Validate()
+	if !url.IsValid() {
+		validationErrors = append(validationErrors, err)
 	}
 
 	if len(validationErrors) > 0 {
@@ -18,10 +30,4 @@ func (v *IngestVisitorValidator) ValidateRequest(r *IngestVisitorRequest) []erro
 	}
 
 	return nil
-}
-
-func validateUID(uid string) bool {
-	//TODO: get more info about the uid type to be validated
-	// For this POC we set default true validation
-	return true
 }

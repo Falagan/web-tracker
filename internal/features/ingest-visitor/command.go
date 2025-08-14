@@ -24,19 +24,19 @@ func NewIngestVisitorsCommandHandler(vr domain.VisitorRepository, ar domain.Anal
 }
 
 func (cmh *IngestVisitorsCommandHandler) handle(ctx context.Context, c *IngestVisitorsCommand) error {
-	v := &domain.Visitor{
-		UID: c.UID,
-		URL: c.URL,
-	}
-	err := cmh.vr.AddUnique(ctx, v)
-
+	v, err := domain.NewVisitor(c.UID, c.URL)
 	if err != nil {
-		return &SaveIngestError
+		return err
+	}
+	
+	err = cmh.vr.AddUnique(ctx, v)
+	if err != nil {
+		return err
 	}
 
-	err = cmh.ar.IncreaseVisitedURLCount(ctx, domain.URL(c.URL))
+	err = cmh.ar.IncreaseVisitedURLCount(ctx, v.URL)
 	if err != nil {
-		return &SaveIngestError
+		return err
 	}
 
 	return nil

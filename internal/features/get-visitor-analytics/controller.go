@@ -53,7 +53,9 @@ func (c *GetVisitorAnalyticsController) handler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	response := c.Mapper.MapToResponse(request.URL, count)
+	analytic, err := c.Mapper.MapToDomain(request.URL, count.ToInt())
+
+	response := c.Mapper.MapToResponse(analytic)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

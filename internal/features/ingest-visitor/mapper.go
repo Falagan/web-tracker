@@ -3,6 +3,8 @@ package ingestvisitor
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/Falagan/web-tracker/internal/domain"
 )
 
 type IngestVisitorRequest struct {
@@ -10,7 +12,7 @@ type IngestVisitorRequest struct {
 	URL string
 }
 
-type IngestVisitorRsponse struct {
+type IngestVisitorResponse struct {
 	message string
 }
 
@@ -25,7 +27,7 @@ func (m *IngestVisitorMapper) MapToIngestVisitorRequest(r *http.Request) (*Inges
 	err := json.NewDecoder(r.Body).Decode(&ivr)
 
 	if err != nil {
-		return nil, &InvalidEvent
+		return nil, &domain.VisitorInvalidRequest
 	}
 
 	return ivr, nil
@@ -38,8 +40,8 @@ func (m *IngestVisitorMapper) MapToCommand(r *IngestVisitorRequest) *IngestVisit
 	}
 }
 
-func (m *IngestVisitorMapper) MapToResponse() *IngestVisitorRsponse {
-	return &IngestVisitorRsponse{
+func (m *IngestVisitorMapper) MapToResponse() *IngestVisitorResponse {
+	return &IngestVisitorResponse{
 		message: "event ingested",
 	}
 }
