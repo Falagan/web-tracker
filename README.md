@@ -203,7 +203,8 @@ performace: # Performance measurements
 
 ## Architecture
 
-Strategy pattern enables runtime switching between implementations. Map strategy includes TTL for data rotation.
+Strategy pattern enables runtime switching between implementations. 
+Map strategy could include in the future iterations some TTL strategy for data rotation if the requiremenmts are more precise.
 
 ## Testing
 
