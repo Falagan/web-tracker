@@ -1,6 +1,6 @@
 package httpserver
 
-const OpenApiHTML = `
+const OpenAPIHTML = `
 <!DOCTYPE html>
 <html>
 <head>

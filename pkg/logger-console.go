@@ -9,10 +9,6 @@ type ConsoleObserver struct {
 	mu sync.Mutex
 }
 
-type ConsoleSpan struct {
-	name string
-}
-
 func NewConsoleObserver() Observer {
 	return &ConsoleObserver{}
 }

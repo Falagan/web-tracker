@@ -55,6 +55,12 @@ func (c *GetVisitorAnalyticsController) handler(w http.ResponseWriter, r *http.R
 
 	analytic, err := c.Mapper.MapToDomain(request.URL, count.ToInt())
 
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	response := c.Mapper.MapToResponse(analytic)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)

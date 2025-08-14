@@ -37,7 +37,7 @@ func main() {
 	getVisitorAnalyticsController.MapEndpoint()
 
 	server.WithHealthCheck()
-	server.WithOpenApi()
+	server.WithOpenAPI()
 	server.StartHTTPServerAsync()
 
 	select {}

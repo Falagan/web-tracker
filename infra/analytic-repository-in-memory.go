@@ -40,7 +40,7 @@ func (ar *AnalyticRepositoryInMemory) GetVisitedURLCount(ctx context.Context, ur
 	count, exists := ar.urlCounts[url]
 
 	if !exists {
-		return nil, errors.New("No Data")
+		return nil, errors.New("no data")
 	}
 	return &count, nil
 }

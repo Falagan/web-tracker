@@ -81,11 +81,11 @@ func (s *HTTPServer) WithHealthCheck() {
 	s.Router.HandleFunc("/health", healthHandler).Methods("GET")
 }
 
-func (s *HTTPServer) WithOpenApi() {
+func (s *HTTPServer) WithOpenAPI() {
 	// serve docs
 	s.Router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(OpenApiHTML))
+		w.Write([]byte(OpenAPIHTML))
 	}).Methods("GET")
 
 	// serve open api spec
