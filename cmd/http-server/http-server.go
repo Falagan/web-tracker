@@ -25,6 +25,7 @@ type HTTPServer struct {
 	VisitorRepository  domain.VisitorRepository
 	AnalyticRepository domain.AnalyticRepository
 	Observer           pkg.Observer
+	Env                string
 }
 
 type HTTPServerConfig struct {
@@ -36,6 +37,7 @@ type HTTPServerConfig struct {
 	VisitorRepository  domain.VisitorRepository
 	AnalyticRepository domain.AnalyticRepository
 	Observer           pkg.Observer
+	Env                string
 }
 
 func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
@@ -52,6 +54,7 @@ func NewHTTPServer(sc *HTTPServerConfig) *HTTPServer {
 		VisitorRepository:  sc.VisitorRepository,
 		AnalyticRepository: sc.AnalyticRepository,
 		Observer:           sc.Observer,
+		Env:                sc.Env,
 	}
 	return server
 }
@@ -67,6 +70,7 @@ func (s *HTTPServer) StartHTTPServerAsync() {
 
 func (s *HTTPServer) startHTTPServer() error {
 	s.Observer.Log(pkg.LogLevelInfo, "Starting server at "+s.Server.Addr)
+	s.Observer.Log(pkg.LogLevelInfo, "Env: "+s.Env)
 	return s.Server.ListenAndServe()
 }
 
