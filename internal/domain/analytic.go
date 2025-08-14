@@ -14,6 +14,7 @@ type Analytic struct {
 var (
 	AnalyticInvalidURLError   = pkg.Error{Code: "EDANALYTICURL", Message: "Analytic has invalid URL"}
 	AnalyticInvalidCountError = pkg.Error{Code: "EDANALYTICCOUNT", Message: "Analytic has invalid count"}
+	AnalyticNoData = pkg.Error{Code: "EANALYTICNODATA", Message: "Analytic url has no data"}
 )
 
 func NewAnalytic(url string, count int) (*Analytic, error) {
