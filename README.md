@@ -45,7 +45,9 @@ Don't solve the data access concurrency problem using an external library
 - **Feature 2**: Query unique visitors analytics via REST endpoint in JSON format
 
 ### Event Ingestion
-**Endpoint**: `POST /api/events`
+**Endpoint**: `POST /web-tracker/new-visitor`
+
+**Request Body:**
 ```json
 {
   "uid": "uuid-visitor",
@@ -53,12 +55,39 @@ Don't solve the data access concurrency problem using an external library
 }
 ```
 
+**Success Response (200):**
+```json
+{
+  "message": "event ingested"
+}
+```
+
+**Error Response (400/500):**
+```json
+{
+  "status_code": 400,
+  "message": "validation failed: invalid URL format",
+  "is_error": true
+}
+```
+
 ### Analytics Query
-**Endpoint**: `GET /api/unique-visitors?url=https://example.com/page`
+**Endpoint**: `GET /web-tracker/analytics?url=https://example.com/page`
+
+**Success Response (200):**
 ```json
 {
   "url": "https://example.com/page",
   "unique_visitors": 1250
+}
+```
+
+**Error Response (400/500):**
+```json
+{
+  "status_code": 400,
+  "message": "invalid URL format",
+  "is_error": true
 }
 ```
 
@@ -161,10 +190,35 @@ README.md
 - Performance optimization
 
 ## API Endpoints
+
+| Method | Endpoint | Description | Content-Type |
+|--------|----------|-------------|--------------|
+| `POST` | `/web-tracker/new-visitor` | Ingest visitor event | `application/json` |
+| `GET` | `/web-tracker/analytics?url={url}` | Get unique visitor count | `application/json` |
+| `GET` | `/health` | Health check | `application/json` |
+| `GET` | `/docs` | OpenAPI documentation | `text/html` |
+| `GET` | `/openapi.yaml` | OpenAPI specification | `application/yaml` |
+
+### Usage Examples
+
+**Ingest a visitor event:**
+```bash
+curl -X POST http://localhost:4001/web-tracker/new-visitor \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uid": "user_12345_session_abc",
+    "url": "https://example.com/homepage"
+  }'
 ```
-POST   /web-tracker/new-visitor
-GET    /web-tracker/analytics
-GET    /health
+
+**Get analytics for a URL:**
+```bash
+curl "http://localhost:4001/web-tracker/analytics?url=https://example.com/homepage"
+```
+
+**Check health:**
+```bash
+curl http://localhost:4001/health
 ```
 ## Makefile Commands
 ```makefile

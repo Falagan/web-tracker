@@ -47,24 +47,31 @@ paths:
         '200':
           description: Visitor successfully ingested
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "event ingested"
+                $ref: '#/components/schemas/IngestVisitorSuccessResponse'
+              example:
+                message: "event ingested"
         '400':
           description: Invalid request - malformed JSON or validation errors
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "Ingest Visitor invalid event"
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status_code: 400
+                message: "validation failed: invalid URL format"
+                is_error: true
         '500':
           description: Internal server error - failed to store visitor data
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "Ingest Visitor can not be stored"
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status_code: 500
+                message: "internal server error"
+                is_error: true
 
   /web-tracker/analytics:
     get:
@@ -106,31 +113,37 @@ paths:
                   summary: Popular page with many visits
                   value:
                     url: "https://example.com/homepage"
-                    count: 1247
+                    unique_visitors: 1247
                 new_page:
                   summary: New page with few visits
                   value:
                     url: "https://example.com/new-feature"
-                    count: 3
+                    unique_visitors: 3
                 zero_visits:
                   summary: Page with no visits
                   value:
                     url: "https://example.com/unused-page"
-                    count: 0
+                    unique_visitors: 0
         '400':
           description: Invalid request - missing or empty URL parameter
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "Get Analytics invalid URL"
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status_code: 400
+                message: "invalid URL format"
+                is_error: true
         '500':
           description: Internal server error - failed to retrieve analytics
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "Analytics can not be retrieved"
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status_code: 500
+                message: "analytics can not be retrieved"
+                is_error: true
 
 components:
   schemas:
@@ -163,36 +176,56 @@ components:
       type: object
       required:
         - url
-        - count
+        - unique_visitors
       properties:
         url:
           type: string
           format: uri
           description: The URL that was queried
           example: "https://example.com/homepage"
-        count:
+        unique_visitors:
           type: integer
           minimum: 0
-          description: Total number of visits to this URL
+          description: Total number of unique visitors to this URL
           example: 1247
       example:
         url: "https://example.com/homepage"
-        count: 1247
+        unique_visitors: 1247
 
-    Error:
+    IngestVisitorSuccessResponse:
       type: object
+      required:
+        - message
       properties:
-        code:
+        message:
           type: string
-          description: Error code for programmatic handling
-          example: "EINGESTVISITORINVALIDEVENT"
+          description: Success message indicating the visitor was ingested
+          example: "event ingested"
+      example:
+        message: "event ingested"
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - is_error
+      properties:
+        status_code:
+          type: integer
+          description: HTTP status code
+          example: 400
         message:
           type: string
           description: Human-readable error message
-          example: "Ingest Visitor invalid event"
+          example: "validation failed: invalid URL format"
+        is_error:
+          type: boolean
+          description: Indicates this is an error response
+          example: true
       example:
-        code: "EINGESTVISITORINVALIDEVENT"
-        message: "Ingest Visitor invalid event"
+        status_code: 400
+        message: "validation failed: invalid URL format"
+        is_error: true
 
   examples:
     HighTrafficSite:
@@ -200,21 +233,21 @@ components:
       description: Example response for a popular website homepage
       value:
         url: "https://popular-site.com/"
-        count: 125847
+        unique_visitors: 125847
 
     EcommercePage:
       summary: E-commerce product page
       description: Analytics for a specific product page
       value:
         url: "https://shop.example.com/products/bestseller-item"
-        count: 3421
+        unique_visitors: 3421
 
     BlogPost:
       summary: Blog post analytics
       description: Visit count for a blog article
       value:
         url: "https://blog.example.com/2024/web-analytics-guide"
-        count: 892
+        unique_visitors: 892
 
 tags:
   - name: Visitor Tracking
