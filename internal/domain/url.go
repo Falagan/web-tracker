@@ -47,36 +47,23 @@ func (u URL) ToString() string {
 	return string(u)
 }
 
-func (u URL) GetPath() string {
-	// Check if URL is empty
+func (u URL) GetPath() (string, error) {
 	if u.IsEmpty() {
-		return ""
+		return "", &URLEmptyError
 	}
-	
+
 	parsed, err := url.Parse(string(u))
 	if err != nil {
-		return ""
+		return "", &URLInvalidFormatError
 	}
-	
-	// Check if URL has a valid scheme (http/https)
-	if parsed.Scheme != "http" && parsed.Scheme != "https" {
-		return ""
-	}
-	
+
 	path := parsed.Path
-	if parsed.RawQuery != "" {
-		path += "?" + parsed.RawQuery
-	}
-	if parsed.Fragment != "" {
-		path += "#" + parsed.Fragment
-	}
-	
-	// Return "/" if path is empty
+
 	if path == "" {
-		return "/"
+		path = "/"
 	}
-	
-	return path
+
+	return path, nil
 }
 
 // URL Counter

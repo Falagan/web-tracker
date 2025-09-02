@@ -36,10 +36,15 @@ func (m *GetVisitorAnalyticsMapper) MapToGetVisitorAnalyticsRequest(r *http.Requ
 	}, nil
 }
 
-func (m *GetVisitorAnalyticsMapper) MapToQuery(r *GetVisitorAnalyticsRequest) *GetVisitorAnalyticsQuery {
-	return &GetVisitorAnalyticsQuery{
-		URL: r.URL,
+func (m *GetVisitorAnalyticsMapper) MapToQuery(r *GetVisitorAnalyticsRequest) (*GetVisitorAnalyticsQuery, error) {
+	url, err := domain.NewURL(r.URL)
+
+	if err != nil {
+		return nil, &domain.URLInvalidFormatError
 	}
+	return &GetVisitorAnalyticsQuery{
+		URL: url,
+	}, nil
 }
 
 func (m *GetVisitorAnalyticsMapper) MapToDomain(url string, count int) (*domain.Analytic, error) {
@@ -53,8 +58,9 @@ func (m *GetVisitorAnalyticsMapper) MapToDomain(url string, count int) (*domain.
 }
 
 func (m *GetVisitorAnalyticsMapper) MapToSuccessResponse(a *domain.Analytic) *GetVisitorAnalyticsResponse {
+	path, _ := a.URL.GetPath()
 	return &GetVisitorAnalyticsResponse{
-		URL:     a.URL.ToString(),
+		URL:     path,
 		Count:   a.Count.ToInt(),
 		IsError: false,
 	}

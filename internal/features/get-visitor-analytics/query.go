@@ -7,7 +7,7 @@ import (
 )
 
 type GetVisitorAnalyticsQuery struct {
-	URL string
+	URL domain.URL
 }
 
 type GetVisitorAnalyticsQueryHandler struct {
@@ -21,7 +21,13 @@ func NewGetVisitorAnalyticsQueryHandler(ar domain.AnalyticRepository) *GetVisito
 }
 
 func (qh *GetVisitorAnalyticsQueryHandler) handle(ctx context.Context, q *GetVisitorAnalyticsQuery) (*domain.URLCount, error) {
-	count, err := qh.ar.GetVisitedURLCount(ctx, domain.URL(q.URL))
+	path, err := q.URL.GetPath()
+
+	if err != nil {
+		return nil, &domain.URLInvalidFormatError
+	}
+
+	count, err := qh.ar.GetVisitedURLCount(ctx, path)
 
 	if err != nil {
 		return nil, &domain.AnalyticNoData

@@ -28,13 +28,16 @@ func (cmh *IngestVisitorsCommandHandler) handle(ctx context.Context, c *IngestVi
 	if err != nil {
 		return err
 	}
-	
-	err = cmh.vr.AddUnique(ctx, v)
+
+	cmh.vr.AddUnique(ctx, v)
+
+	path, err := v.URL.GetPath()
+
 	if err != nil {
-		return err
+		return &domain.URLInvalidFormatError
 	}
 
-	err = cmh.ar.IncreaseVisitedURLCount(ctx, v.URL)
+	err = cmh.ar.IncreaseVisitedURLCount(ctx, path)
 	if err != nil {
 		return err
 	}

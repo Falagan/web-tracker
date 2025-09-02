@@ -22,11 +22,23 @@ func NewVisitorRepositoryInMemoryBloom(expectedElements uint, falsePositiveRate 
 }
 
 func (vr *VisitorRepositoryInMemoryBloom) AddUnique(ctx context.Context, v *domain.Visitor) error {
-	uidBytes := []byte(v.UID)
 	vr.mu.Lock()
-
 	defer vr.mu.Unlock()
 
-	vr.bloomFilter.Add(uidBytes)
+	path, err := v.URL.GetPath()
+
+	if err != nil {
+		return &domain.URLInvalidFormatError
+	}
+
+	uniqueKey := v.UID.ToString() + path
+	uidBytes := []byte(uniqueKey)
+
+	// only adds if its no present
+	if !vr.bloomFilter.Test(uidBytes) {
+		vr.bloomFilter.Add(uidBytes)
+		return nil
+	}
+
 	return nil
 }

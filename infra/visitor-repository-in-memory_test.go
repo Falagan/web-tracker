@@ -18,31 +18,30 @@ func TestVisitorRepositoryInMemory_AddUnique(t *testing.T) {
 		testCase := tb.WithUniqueVisitor()
 		// act
 		repo := NewVisitorRepositoryInMemory()
-		err := repo.AddUnique(context.Background(), testCase.visitor)
-		// assert
-		assert.NoError(t, err)
+		repo.AddUnique(context.Background(), testCase.visitor)
 		// verify visitor was added
+		path, _ := testCase.visitor.URL.GetPath()
+		uniqueKey := testCase.visitor.UID.ToString() + path
 		repo.mu.RLock()
-		exists := repo.visitors[testCase.visitor.UID]
+		exists := repo.visitors[uniqueKey]
 		repo.mu.RUnlock()
 		assert.True(t, exists)
 	})
 
-	t.Run("add_duplicate_visitor_success", func(t *testing.T) {
+	t.Run("add_duplicate_visitor_idempotent", func(t *testing.T) {
 		// arrange
 		testCase := tb.WithDuplicateVisitor()
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		// add first time
-		err1 := repo.AddUnique(context.Background(), testCase.visitor)
+		repo.AddUnique(context.Background(), testCase.visitor)
 		// add same visitor again (should be idempotent)
-		err2 := repo.AddUnique(context.Background(), testCase.visitor)
-		// assert
-		assert.NoError(t, err1)
-		assert.NoError(t, err2)
+		repo.AddUnique(context.Background(), testCase.visitor)
 		// verify visitor exists only once
+		path, _ := testCase.visitor.URL.GetPath()
+		uniqueKey := testCase.visitor.UID.ToString() + path
 		repo.mu.RLock()
-		exists := repo.visitors[testCase.visitor.UID]
+		exists := repo.visitors[uniqueKey]
 		count := len(repo.visitors)
 		repo.mu.RUnlock()
 		assert.True(t, exists)
@@ -55,8 +54,7 @@ func TestVisitorRepositoryInMemory_AddUnique(t *testing.T) {
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		for _, visitor := range testCase.visitors {
-			err := repo.AddUnique(context.Background(), visitor)
-			assert.NoError(t, err)
+			repo.AddUnique(context.Background(), visitor)
 		}
 		// assert
 		repo.mu.RLock()
@@ -71,63 +69,60 @@ func TestVisitorRepositoryInMemory_AddUnique(t *testing.T) {
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		var wg sync.WaitGroup
-		errors := make(chan error, len(testCase.visitors))
 
 		for _, visitor := range testCase.visitors {
 			wg.Add(1)
 			go func(v *domain.Visitor) {
 				defer wg.Done()
-				if err := repo.AddUnique(context.Background(), v); err != nil {
-					errors <- err
-				}
+				repo.AddUnique(context.Background(), v)
 			}(visitor)
 		}
 
 		wg.Wait()
-		close(errors)
 
 		// assert
-		for err := range errors {
-			assert.NoError(t, err)
-		}
-
 		repo.mu.RLock()
 		count := len(repo.visitors)
 		repo.mu.RUnlock()
 		assert.Equal(t, len(testCase.visitors), count)
 	})
 
-	t.Run("concurrent_duplicate_visitors_all_success", func(t *testing.T) {
+	t.Run("concurrent_duplicate_visitors_idempotent", func(t *testing.T) {
 		// arrange
 		testCase := tb.WithConcurrentDuplicateVisitors()
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		var wg sync.WaitGroup
-		errorChan := make(chan error, testCase.numGoroutines)
 
 		for i := 0; i < testCase.numGoroutines; i++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				if err := repo.AddUnique(context.Background(), testCase.visitor); err != nil {
-					errorChan <- err
-				}
+				repo.AddUnique(context.Background(), testCase.visitor)
 			}()
 		}
 
 		wg.Wait()
-		close(errorChan)
 
-		// assert - all operations should succeed (idempotent)
-		for err := range errorChan {
-			assert.NoError(t, err)
-		}
-
-		// verify only one visitor entry exists
+		// assert - all operations succeed (idempotent), only one entry exists
 		repo.mu.RLock()
 		count := len(repo.visitors)
 		repo.mu.RUnlock()
 		assert.Equal(t, 1, count)
+	})
+
+	t.Run("same_visitor_different_urls_success", func(t *testing.T) {
+		// arrange
+		testCase := tb.WithSameVisitorDifferentURLs()
+		// act
+		repo := NewVisitorRepositoryInMemory()
+		repo.AddUnique(context.Background(), testCase.visitors[0])
+		repo.AddUnique(context.Background(), testCase.visitors[1])
+		// verify both entries exist
+		repo.mu.RLock()
+		count := len(repo.visitors)
+		repo.mu.RUnlock()
+		assert.Equal(t, 2, count)
 	})
 }
 
@@ -158,6 +153,7 @@ func (tb *TestVisitorRepositoryBuilder) WithUniqueVisitor() *TestVisitorReposito
 	return &TestVisitorRepositoryCase{
 		visitor: &domain.Visitor{
 			UID: domain.UID("unique-visitor-123"),
+			URL: domain.URL("https://example.com/page1"),
 		},
 	}
 }
@@ -166,6 +162,7 @@ func (tb *TestVisitorRepositoryBuilder) WithDuplicateVisitor() *TestVisitorRepos
 	return &TestVisitorRepositoryCase{
 		visitor: &domain.Visitor{
 			UID: domain.UID("duplicate-visitor-456"),
+			URL: domain.URL("https://example.com/page2"),
 		},
 	}
 }
@@ -173,11 +170,11 @@ func (tb *TestVisitorRepositoryBuilder) WithDuplicateVisitor() *TestVisitorRepos
 func (tb *TestVisitorRepositoryBuilder) WithMultipleUniqueVisitors() *TestVisitorRepositoryCase {
 	return &TestVisitorRepositoryCase{
 		visitors: []*domain.Visitor{
-			{UID: domain.UID("visitor-1")},
-			{UID: domain.UID("visitor-2")},
-			{UID: domain.UID("visitor-3")},
-			{UID: domain.UID("visitor-4")},
-			{UID: domain.UID("visitor-5")},
+			{UID: domain.UID("visitor-1"), URL: domain.URL("https://example.com/page1")},
+			{UID: domain.UID("visitor-2"), URL: domain.URL("https://example.com/page2")},
+			{UID: domain.UID("visitor-3"), URL: domain.URL("https://example.com/page3")},
+			{UID: domain.UID("visitor-4"), URL: domain.URL("https://example.com/page4")},
+			{UID: domain.UID("visitor-5"), URL: domain.URL("https://example.com/page5")},
 		},
 	}
 }
@@ -185,10 +182,11 @@ func (tb *TestVisitorRepositoryBuilder) WithMultipleUniqueVisitors() *TestVisito
 func (tb *TestVisitorRepositoryBuilder) WithConcurrentUniqueVisitors() *TestVisitorRepositoryCase {
 	const numVisitors = 100
 	visitors := make([]*domain.Visitor, numVisitors)
-	
-	for i := 0; i < numVisitors; i++ {
+
+	for i := range numVisitors {
 		visitors[i] = &domain.Visitor{
 			UID: domain.UID(fmt.Sprintf("concurrent-visitor-%d", i)),
+			URL: domain.URL(fmt.Sprintf("https://example.com/page-%d", i)),
 		}
 	}
 
@@ -201,7 +199,17 @@ func (tb *TestVisitorRepositoryBuilder) WithConcurrentDuplicateVisitors() *TestV
 	return &TestVisitorRepositoryCase{
 		visitor: &domain.Visitor{
 			UID: domain.UID("concurrent-duplicate-visitor"),
+			URL: domain.URL("https://example.com/same-page"),
 		},
 		numGoroutines: 10,
+	}
+}
+
+func (tb *TestVisitorRepositoryBuilder) WithSameVisitorDifferentURLs() *TestVisitorRepositoryCase {
+	return &TestVisitorRepositoryCase{
+		visitors: []*domain.Visitor{
+			{UID: domain.UID("same-visitor"), URL: domain.URL("https://example.com/page1")},
+			{UID: domain.UID("same-visitor"), URL: domain.URL("https://example.com/page2")},
+		},
 	}
 }

@@ -8,13 +8,13 @@ import (
 )
 
 type VisitorRepositoryInMemory struct {
-	visitors map[domain.UID]bool
+	visitors map[string]bool
 	mu       sync.RWMutex
 }
 
 func NewVisitorRepositoryInMemory() *VisitorRepositoryInMemory {
 	return &VisitorRepositoryInMemory{
-		visitors: make(map[domain.UID]bool),
+		visitors: make(map[string]bool),
 	}
 }
 
@@ -22,6 +22,19 @@ func (vr *VisitorRepositoryInMemory) AddUnique(ctx context.Context, v *domain.Vi
 	vr.mu.Lock()
 	defer vr.mu.Unlock()
 
-	vr.visitors[v.UID] = true
+	path, err := v.URL.GetPath()
+
+	if err != nil {
+		return &domain.URLInvalidFormatError
+	}
+
+	uniqueKey := v.UID.ToString() + path
+
+	_, exists := vr.visitors[uniqueKey]
+	if !exists {
+		vr.visitors[uniqueKey] = true
+		return nil
+	}
+
 	return nil
 }

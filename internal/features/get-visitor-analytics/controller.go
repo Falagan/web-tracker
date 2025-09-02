@@ -42,11 +42,17 @@ func (c *GetVisitorAnalyticsController) handler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	query := c.Mapper.MapToQuery(request)
-	count, err := c.QueryHandler.handle(ctx, query)
+	query, err := c.Mapper.MapToQuery(request)
 
 	if err != nil {
 		c.responseError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	count, err := c.QueryHandler.handle(ctx, query)
+
+	if err != nil {
+		c.responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
