@@ -9,17 +9,17 @@ import (
 )
 
 type AnalyticRepositoryInMemory struct {
-	urlCounts map[domain.URL]domain.URLCount
+	urlCounts map[string]domain.URLCount
 	mu        sync.RWMutex
 }
 
 func NewAnalyticRepositoryInMemory() *AnalyticRepositoryInMemory {
 	return &AnalyticRepositoryInMemory{
-		urlCounts: make(map[domain.URL]domain.URLCount),
+		urlCounts: make(map[string]domain.URLCount),
 	}
 }
 
-func (ar *AnalyticRepositoryInMemory) IncreaseVisitedURLCount(ctx context.Context, url domain.URL) error {
+func (ar *AnalyticRepositoryInMemory) IncreaseVisitedURLCount(ctx context.Context, url string) error {
 	ar.mu.Lock()
 	defer ar.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (ar *AnalyticRepositoryInMemory) IncreaseVisitedURLCount(ctx context.Contex
 	return nil
 }
 
-func (ar *AnalyticRepositoryInMemory) GetVisitedURLCount(ctx context.Context, url domain.URL) (*domain.URLCount, error) {
+func (ar *AnalyticRepositoryInMemory) GetVisitedURLCount(ctx context.Context, url string) (*domain.URLCount, error) {
 	ar.mu.RLock()
 	defer ar.mu.RUnlock()
 

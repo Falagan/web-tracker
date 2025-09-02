@@ -14,7 +14,7 @@ type Analytic struct {
 var (
 	AnalyticInvalidURLError   = pkg.Error{Code: "EDANALYTICURL", Message: "Analytic has invalid URL"}
 	AnalyticInvalidCountError = pkg.Error{Code: "EDANALYTICCOUNT", Message: "Analytic has invalid count"}
-	AnalyticNoData = pkg.Error{Code: "EANALYTICNODATA", Message: "Analytic url has no data"}
+	AnalyticNoData            = pkg.Error{Code: "EANALYTICNODATA", Message: "Analytic url has no data"}
 )
 
 func NewAnalytic(url string, count int) (*Analytic, error) {
@@ -22,9 +22,9 @@ func NewAnalytic(url string, count int) (*Analytic, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	validCount := NewURLCount(count)
-	
+
 	return &Analytic{
 		URL:   validURL,
 		Count: validCount,
@@ -35,11 +35,11 @@ func (a *Analytic) Validate() error {
 	if err := a.URL.Validate(); err != nil {
 		return &AnalyticInvalidURLError
 	}
-	
+
 	if !a.Count.IsValid() {
 		return &AnalyticInvalidCountError
 	}
-	
+
 	return nil
 }
 
@@ -48,6 +48,6 @@ func (a *Analytic) IsValid() bool {
 }
 
 type AnalyticRepository interface {
-	IncreaseVisitedURLCount(ctx context.Context, url URL) error
-	GetVisitedURLCount(ctx context.Context, url URL) (*URLCount, error)
+	IncreaseVisitedURLCount(ctx context.Context, url string) error
+	GetVisitedURLCount(ctx context.Context, url string) (*URLCount, error)
 }
