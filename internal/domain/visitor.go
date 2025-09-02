@@ -17,6 +17,7 @@ var (
 	VisitorInvalidRequest = pkg.Error{Code: "EDVISITORREQUEST", Message: "Visitor invalid request"}
 )
 
+
 func NewVisitor(uid string, url string) (*Visitor, error) {
 	validUID, err := NewUID(uid)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Falagan/web-tracker/internal/domain"
+	"github.com/Falagan/web-tracker/pkg"
 )
 
 type IngestVisitorRequest struct {
@@ -13,7 +14,9 @@ type IngestVisitorRequest struct {
 }
 
 type IngestVisitorResponse struct {
-	message string
+	StatusCode int    `json:"status_code,omitempty"`
+	Message    string `json:"message"`
+	IsError    bool   `json:"is_error,omitempty"`
 }
 
 type IngestVisitorMapper struct{}
@@ -40,8 +43,17 @@ func (m *IngestVisitorMapper) MapToCommand(r *IngestVisitorRequest) *IngestVisit
 	}
 }
 
-func (m *IngestVisitorMapper) MapToResponse() *IngestVisitorResponse {
+func (m *IngestVisitorMapper) MapToSuccessResponse() *IngestVisitorResponse {
 	return &IngestVisitorResponse{
-		message: "event ingested",
+		Message: "event ingested",
+		IsError: false,
+	}
+}
+
+func (m *IngestVisitorMapper) MapToErrorResponse(e error, statusCode int) *IngestVisitorResponse {
+	return &IngestVisitorResponse{
+		StatusCode: statusCode,
+		Message:    pkg.ErrorMessage(e),
+		IsError:    true,
 	}
 }
