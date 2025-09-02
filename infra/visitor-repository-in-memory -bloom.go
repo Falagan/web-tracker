@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/Falagan/web-tracker/internal/domain"
@@ -40,5 +41,5 @@ func (vr *VisitorRepositoryInMemoryBloom) AddUnique(ctx context.Context, v *doma
 		return nil
 	}
 
-	return nil
+	return errors.New("not unique")
 }

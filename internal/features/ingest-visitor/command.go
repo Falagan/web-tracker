@@ -29,7 +29,11 @@ func (cmh *IngestVisitorsCommandHandler) handle(ctx context.Context, c *IngestVi
 		return err
 	}
 
-	cmh.vr.AddUnique(ctx, v)
+	err = cmh.vr.AddUnique(ctx, v)
+
+	if err != nil {
+		return &domain.VisitorNotUnique
+	}
 
 	path, err := v.URL.GetPath()
 

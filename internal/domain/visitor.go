@@ -14,9 +14,9 @@ type Visitor struct {
 var (
 	VisitorInvalidUIDError = pkg.Error{Code: "EDVISITORUID", Message: "Visitor has invalid UID"}
 	VisitorInvalidURLError = pkg.Error{Code: "EDVISITORURL", Message: "Visitor has invalid URL"}
-	VisitorInvalidRequest = pkg.Error{Code: "EDVISITORREQUEST", Message: "Visitor invalid request"}
+	VisitorInvalidRequest  = pkg.Error{Code: "EDVISITORREQUEST", Message: "Visitor invalid request"}
+	VisitorNotUnique       = pkg.Error{Code: "EDVISITORNOTUNIQUE", Message: "Visitor not unique"}
 )
-
 
 func NewVisitor(uid string, url string) (*Visitor, error) {
 	validUID, err := NewUID(uid)
