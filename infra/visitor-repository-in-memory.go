@@ -2,7 +2,6 @@ package infra
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"github.com/Falagan/web-tracker/internal/domain"
@@ -23,11 +22,6 @@ func (vr *VisitorRepositoryInMemory) AddUnique(ctx context.Context, v *domain.Vi
 	vr.mu.Lock()
 	defer vr.mu.Unlock()
 
-	_, exists := vr.visitors[v.UID]
-	if !exists {
-		vr.visitors[v.UID] = true
-		return nil
-	}
-
-	return errors.New("not unique")
+	vr.visitors[v.UID] = true
+	return nil
 }

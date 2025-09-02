@@ -28,19 +28,25 @@ func TestVisitorRepositoryInMemory_AddUnique(t *testing.T) {
 		assert.True(t, exists)
 	})
 
-	t.Run("add_duplicate_visitor_error", func(t *testing.T) {
+	t.Run("add_duplicate_visitor_success", func(t *testing.T) {
 		// arrange
 		testCase := tb.WithDuplicateVisitor()
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		// add first time
 		err1 := repo.AddUnique(context.Background(), testCase.visitor)
-		// add same visitor again
+		// add same visitor again (should be idempotent)
 		err2 := repo.AddUnique(context.Background(), testCase.visitor)
 		// assert
 		assert.NoError(t, err1)
-		assert.Error(t, err2)
-		assert.Equal(t, testCase.expectedError, err2.Error())
+		assert.NoError(t, err2)
+		// verify visitor exists only once
+		repo.mu.RLock()
+		exists := repo.visitors[testCase.visitor.UID]
+		count := len(repo.visitors)
+		repo.mu.RUnlock()
+		assert.True(t, exists)
+		assert.Equal(t, 1, count)
 	})
 
 	t.Run("add_multiple_unique_visitors_success", func(t *testing.T) {
@@ -91,36 +97,37 @@ func TestVisitorRepositoryInMemory_AddUnique(t *testing.T) {
 		assert.Equal(t, len(testCase.visitors), count)
 	})
 
-	t.Run("concurrent_duplicate_visitors_single_success", func(t *testing.T) {
+	t.Run("concurrent_duplicate_visitors_all_success", func(t *testing.T) {
 		// arrange
 		testCase := tb.WithConcurrentDuplicateVisitors()
 		// act
 		repo := NewVisitorRepositoryInMemory()
 		var wg sync.WaitGroup
-		successCount := make(chan bool, testCase.numGoroutines)
-		errorCount := make(chan bool, testCase.numGoroutines)
+		errorChan := make(chan error, testCase.numGoroutines)
 
 		for i := 0; i < testCase.numGoroutines; i++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				if err := repo.AddUnique(context.Background(), testCase.visitor); err != nil {
-					errorCount <- true
-				} else {
-					successCount <- true
+					errorChan <- err
 				}
 			}()
 		}
 
 		wg.Wait()
-		close(successCount)
-		close(errorCount)
+		close(errorChan)
 
-		// assert
-		successes := len(successCount)
-		errors := len(errorCount)
-		assert.Equal(t, 1, successes)
-		assert.Equal(t, testCase.numGoroutines-1, errors)
+		// assert - all operations should succeed (idempotent)
+		for err := range errorChan {
+			assert.NoError(t, err)
+		}
+
+		// verify only one visitor entry exists
+		repo.mu.RLock()
+		count := len(repo.visitors)
+		repo.mu.RUnlock()
+		assert.Equal(t, 1, count)
 	})
 }
 
@@ -138,10 +145,9 @@ func TestNewVisitorRepositoryInMemory(t *testing.T) {
 type TestVisitorRepositoryBuilder struct{}
 
 type TestVisitorRepositoryCase struct {
-	visitor        *domain.Visitor
-	visitors       []*domain.Visitor
-	expectedError  string
-	numGoroutines  int
+	visitor       *domain.Visitor
+	visitors      []*domain.Visitor
+	numGoroutines int
 }
 
 func NewTestVisitorRepositoryBuilder() *TestVisitorRepositoryBuilder {
@@ -161,7 +167,6 @@ func (tb *TestVisitorRepositoryBuilder) WithDuplicateVisitor() *TestVisitorRepos
 		visitor: &domain.Visitor{
 			UID: domain.UID("duplicate-visitor-456"),
 		},
-		expectedError: "not unique",
 	}
 }
 
