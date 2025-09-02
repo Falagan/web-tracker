@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Falagan/web-tracker/internal/domain"
+	"github.com/Falagan/web-tracker/pkg"
 )
 
 type GetVisitorAnalyticsRequest struct {
@@ -11,8 +12,11 @@ type GetVisitorAnalyticsRequest struct {
 }
 
 type GetVisitorAnalyticsResponse struct {
-	URL   string `json:"url"`
-	Count int    `json:"count"`
+	StatusCode int    `json:"status_code,omitempty"`
+	URL        string `json:"url,omitempty"`
+	Count      int    `json:"unique_visitors,omitempty"`
+	Message    string `json:"message,omitempty"`
+	IsError    bool   `json:"is_error,omitempty"`
 }
 
 type GetVisitorAnalyticsMapper struct{}
@@ -48,9 +52,18 @@ func (m *GetVisitorAnalyticsMapper) MapToDomain(url string, count int) (*domain.
 	return analytic, nil
 }
 
-func (m *GetVisitorAnalyticsMapper) MapToResponse(a *domain.Analytic) *GetVisitorAnalyticsResponse {
+func (m *GetVisitorAnalyticsMapper) MapToSuccessResponse(a *domain.Analytic) *GetVisitorAnalyticsResponse {
 	return &GetVisitorAnalyticsResponse{
-		URL:   a.URL.ToString(),
-		Count: a.Count.ToInt(),
+		URL:     a.URL.ToString(),
+		Count:   a.Count.ToInt(),
+		IsError: false,
+	}
+}
+
+func (m *GetVisitorAnalyticsMapper) MapToErrorResponse(e error, statusCode int) *GetVisitorAnalyticsResponse {
+	return &GetVisitorAnalyticsResponse{
+		StatusCode: statusCode,
+		Message:    pkg.ErrorMessage(e),
+		IsError:    true,
 	}
 }

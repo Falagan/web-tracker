@@ -20,8 +20,8 @@ func (v *IngestVisitorValidator) ValidateRequest(r *IngestVisitorRequest) []erro
 	}
 
 	url := domain.URL(r.URL)
-	err = url.Validate()
 	if !url.IsValid() {
+		err = url.Validate()
 		validationErrors = append(validationErrors, err)
 	}
 
