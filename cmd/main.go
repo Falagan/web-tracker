@@ -17,15 +17,18 @@ func main() {
 
 	env := envs.NewEnv()
 
-	visitorRepository := infra.NewVisitorRepositoryInMemoryBloom(1000, 0.01)
+	visitorRepository := infra.NewVisitorRepositoryInMemoryBloom(
+		uint(env.BloomExpectedElements), 
+		env.BloomFalsePositiveRate,
+	)
 	analyticRepository := infra.NewAnalyticRepositoryInMemory()
 
 	config := &httpserver.HTTPServerConfig{
 		Address:            env.ServerAddress,
 		Port:               env.ServerPort,
-		ReadTimeout:        time.Second * 30,
-		WriteTimeout:       time.Second * 30,
-		IdleTimeout:        time.Second * 30,
+		ReadTimeout:        time.Second * time.Duration(env.ServerReadTimeout),
+		WriteTimeout:       time.Second * time.Duration(env.ServerWriteTimeout),
+		IdleTimeout:        time.Second * time.Duration(env.ServerIdleTimeout),
 		VisitorRepository:  visitorRepository,
 		AnalyticRepository: analyticRepository,
 		Observer:           pkg.NewConsoleObserver(),
