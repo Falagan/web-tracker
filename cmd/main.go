@@ -18,7 +18,7 @@ func main() {
 	env := envs.NewEnv()
 
 	visitorRepository := infra.NewVisitorRepositoryInMemoryBloom(1000, 0.01)
-	analiticRepository := infra.NewAnalyticRepositoryInMemory()
+	analyticRepository := infra.NewAnalyticRepositoryInMemory()
 
 	config := &httpserver.HTTPServerConfig{
 		Address:            env.ServerAddress,
@@ -27,7 +27,7 @@ func main() {
 		WriteTimeout:       time.Second * 30,
 		IdleTimeout:        time.Second * 30,
 		VisitorRepository:  visitorRepository,
-		AnalyticRepository: analiticRepository,
+		AnalyticRepository: analyticRepository,
 		Observer:           pkg.NewConsoleObserver(),
 		Env:                env.AppEnv,
 	}
