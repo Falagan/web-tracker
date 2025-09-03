@@ -11,29 +11,15 @@ func NewIngestVisitorValidator() *IngestVisitorValidator {
 }
 
 func (v *IngestVisitorValidator) ValidateRequest(r *IngestVisitorRequest) []error {
-	validationErrors := []error{}
+	var validationErrors []error
 
-	uid := domain.UID(r.UID)
-	err := uid.Validate()
-	if err != nil {
+	if err := domain.ValidateUID(r.UID); err != nil {
 		validationErrors = append(validationErrors, err)
 	}
 
-	url, err := domain.NewURL(r.URL)
-
-	if err != nil {
+	if err := domain.ValidateURL(r.URL); err != nil {
 		validationErrors = append(validationErrors, err)
 	}
 
-	err = url.Validate()
-
-	if err != nil {
-		validationErrors = append(validationErrors, err)
-	}
-
-	if len(validationErrors) > 0 {
-		return validationErrors
-	}
-
-	return nil
+	return validationErrors
 }

@@ -9,8 +9,8 @@ func NewGetVisitorAnalyticsValidator() *GetVisitorAnalyticsValidator {
 }
 
 func (v *GetVisitorAnalyticsValidator) ValidateRequest(r *GetVisitorAnalyticsRequest) error {
-	url := domain.URL(r.URL)
-	err := url.Validate()
+	err := domain.ValidateURL(r.URL)
+
 	if err != nil {
 		return err
 	}

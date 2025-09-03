@@ -23,28 +23,16 @@ func NewAnalytic(url string, count int) (*Analytic, error) {
 		return nil, err
 	}
 
-	validCount := NewURLCount(count)
+	validCount, err := NewURLCount(count)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &Analytic{
 		URL:   validURL,
 		Count: validCount,
 	}, nil
-}
-
-func (a *Analytic) Validate() error {
-	if err := a.URL.Validate(); err != nil {
-		return &AnalyticInvalidURLError
-	}
-
-	if !a.Count.IsValid() {
-		return &AnalyticInvalidCountError
-	}
-
-	return nil
-}
-
-func (a *Analytic) IsValid() bool {
-	return a.Validate() == nil
 }
 
 type AnalyticRepository interface {

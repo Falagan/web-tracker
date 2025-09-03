@@ -34,23 +34,6 @@ func NewVisitor(uid string, url string) (*Visitor, error) {
 		URL: validURL,
 	}, nil
 }
-
-func (v *Visitor) Validate() error {
-	if err := v.UID.Validate(); err != nil {
-		return &VisitorInvalidUIDError
-	}
-
-	if err := v.URL.Validate(); err != nil {
-		return &VisitorInvalidURLError
-	}
-
-	return nil
-}
-
-func (v *Visitor) IsValid() bool {
-	return v.Validate() == nil
-}
-
 type VisitorRepository interface {
 	AddUnique(ctx context.Context, user *Visitor) error
 }
