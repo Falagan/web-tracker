@@ -60,7 +60,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 status_code: 400
-                message: "validation failed: invalid URL format"
+                message: "UID cannot be empty"
                 is_error: true
         '500':
           description: Internal server error - failed to store visitor data
@@ -94,13 +94,13 @@ paths:
           examples:
             homepage:
               summary: Homepage analytics
-              value: "homepage"
+              value: "/homepage"
             product_page:
               summary: Product page analytics  
-              value: "products/item-123"
+              value: "/products/item-123"
             blog_post:
               summary: Blog post analytics
-              value: "posts/how-to-track-visitors"
+              value: "/posts/how-to-track-visitors"
       responses:
         '200':
           description: Analytics data retrieved successfully
@@ -132,7 +132,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 status_code: 400
-                message: "invalid URL format"
+                message: "URL cannot be empty"
                 is_error: true
         '500':
           description: Internal server error - failed to retrieve analytics
@@ -142,7 +142,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 status_code: 500
-                message: "analytics can not be retrieved"
+                message: "Analytic url has no data"
                 is_error: true
 
 components:
@@ -180,16 +180,15 @@ components:
       properties:
         url:
           type: string
-          format: uri
-          description: The URL that was queried
-          example: "https://example.com/homepage"
+          description: The URL path that was queried (without domain)
+          example: "/homepage"
         unique_visitors:
           type: integer
           minimum: 0
           description: Total number of unique visitors to this URL
           example: 1247
       example:
-        url: "https://example.com/homepage"
+        url: "/homepage"
         unique_visitors: 1247
 
     IngestVisitorSuccessResponse:
@@ -212,19 +211,27 @@ components:
       properties:
         status_code:
           type: integer
-          description: HTTP status code
+          description: HTTP status code (only included in error responses)
           example: 400
         message:
           type: string
           description: Human-readable error message
-          example: "validation failed: invalid URL format"
+          example: "UID cannot be empty"
         is_error:
           type: boolean
-          description: Indicates this is an error response
+          description: Always true for error responses
           example: true
+        url:
+          type: string
+          description: URL field (may be present in analytics error responses)
+          example: ""
+        unique_visitors:
+          type: integer
+          description: Visitors field (may be present in analytics error responses)
+          example: 0
       example:
         status_code: 400
-        message: "validation failed: invalid URL format"
+        message: "UID cannot be empty"
         is_error: true
 
   examples:
@@ -232,21 +239,21 @@ components:
       summary: High traffic website analytics
       description: Example response for a popular website homepage
       value:
-        url: "https://popular-site.com/"
+        url: "/"
         unique_visitors: 125847
 
     EcommercePage:
       summary: E-commerce product page
       description: Analytics for a specific product page
       value:
-        url: "products/bestseller-item"
+        url: "/products/bestseller-item"
         unique_visitors: 3421
 
     BlogPost:
       summary: Blog post analytics
       description: Visit count for a blog article
       value:
-        url: "2024/web-analytics-guide"
+        url: "/2024/web-analytics-guide"
         unique_visitors: 892
 
 tags:
