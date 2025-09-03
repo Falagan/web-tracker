@@ -10,33 +10,16 @@ import (
 type URL string
 
 var (
-	URLEmptyError         = pkg.Error{Code: "EDURLEMEPTY", Message: "URL cannot be empty"}
-	URLInvalidFormatError = pkg.Error{Code: "EDURLINVALIDFORMAT", Message: "URL has invalid format"}
+	URLEmptyError              = pkg.Error{Code: "EDURLEMEPTY", Message: "URL cannot be empty"}
+	URLInvalidFormatError      = pkg.Error{Code: "EDURLINVALIDFORMAT", Message: "URL has invalid format"}
+	URLCountInvalidFormatError = pkg.Error{Code: "EDURLCOUNTINVALIDFORMAT", Message: "URLCount has invalid format"}
 )
 
 func NewURL(s string) (URL, error) {
-	u := URL(s)
-	if err := u.Validate(); err != nil {
+	if err := ValidateURL(s); err != nil {
 		return "", err
 	}
-	return u, nil
-}
-
-func (u URL) Validate() error {
-	if len(strings.TrimSpace(string(u))) == 0 {
-		return &URLEmptyError
-	}
-
-	_, err := url.Parse(string(u))
-	if err != nil {
-		return &URLInvalidFormatError
-	}
-
-	return nil
-}
-
-func (u URL) IsEmpty() bool {
-	return len(strings.TrimSpace(string(u))) == 0
+	return URL(s), nil
 }
 
 func (u URL) ToString() string {
@@ -44,10 +27,6 @@ func (u URL) ToString() string {
 }
 
 func (u URL) GetPath() (string, error) {
-	if u.IsEmpty() {
-		return "", &URLEmptyError
-	}
-
 	parsed, err := url.Parse(string(u))
 	if err != nil {
 		return "", &URLInvalidFormatError
@@ -62,43 +41,48 @@ func (u URL) GetPath() (string, error) {
 	return path, nil
 }
 
+func ValidateURL(s string) error {
+	if err := validateURLEmpty(s); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func validateURLEmpty(s string) error {
+	if len(strings.TrimSpace(s)) == 0 {
+		return &URLEmptyError
+	}
+	return nil
+}
+
 // URL Counter
 
 type URLCount int
 
-func NewURLCount(i int) URLCount {
-	if i < 0 {
-		return 0
+
+func NewURLCount(i int) (URLCount, error) {
+	if err := ValidateURLCount(i); err != nil {
+		return 0, err
 	}
-	return URLCount(i)
-}
-
-func (c URLCount) IsValid() bool {
-	return c >= 0
-}
-
-func (c URLCount) IsZero() bool {
-	return c == 0
-}
-
-func (c URLCount) IsPositive() bool {
-	return c > 0
-}
-
-func (c URLCount) Increment() URLCount {
-	if c < 0 {
-		return 1
-	}
-	return c + 1
-}
-
-func (c URLCount) Add(value URLCount) URLCount {
-	if c < 0 || value < 0 {
-		return 0
-	}
-	return c + value
+	return URLCount(i), nil
 }
 
 func (c URLCount) ToInt() int {
 	return int(c)
+}
+
+func ValidateURLCount(i int) error {
+	if err := validateURLCountRange(i); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func validateURLCountRange(i int) error {
+	if i < 0 {
+		return &URLCountInvalidFormatError
+	}
+	return nil
 }

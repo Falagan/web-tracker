@@ -13,29 +13,27 @@ var (
 )
 
 func NewUID(s string) (UID, error) {
-	uid := UID(s)
-	if err := uid.Validate(); err != nil {
+	if err := ValidateUID(s); err != nil {
 		return "", err
 	}
-	return uid, nil
-}
-
-func (u UID) Validate() error {
-	if u.IsEmpty() {
-		return &UIDEmptyError
-	}
-
-	return nil
-}
-
-func (u UID) IsValid() bool {
-	return u.Validate() == nil
-}
-
-func (u UID) IsEmpty() bool {
-	return len(strings.TrimSpace(u.ToString())) == 0
+	return UID(s), nil
 }
 
 func (u UID) ToString() string {
 	return string(u)
+}
+
+func ValidateUID(s string) error {
+	if err := validateUIDEmpty(s); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func validateUIDEmpty(s string) error {
+	if len(strings.TrimSpace(s)) == 0 {
+		return &UIDEmptyError
+	}
+	return nil
 }
