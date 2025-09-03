@@ -35,10 +35,6 @@ func (u URL) Validate() error {
 	return nil
 }
 
-func (u URL) IsValid() bool {
-	return u.Validate() == nil
-}
-
 func (u URL) IsEmpty() bool {
 	return len(strings.TrimSpace(string(u))) == 0
 }
