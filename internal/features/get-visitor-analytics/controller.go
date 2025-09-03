@@ -52,7 +52,7 @@ func (c *GetVisitorAnalyticsController) handler(w http.ResponseWriter, r *http.R
 	count, err := c.QueryHandler.handle(ctx, query)
 
 	if err != nil {
-		c.responseError(w, err, http.StatusBadRequest)
+		c.responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
