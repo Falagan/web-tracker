@@ -19,9 +19,15 @@ func (v *IngestVisitorValidator) ValidateRequest(r *IngestVisitorRequest) []erro
 		validationErrors = append(validationErrors, err)
 	}
 
-	url := domain.URL(r.URL)
-	if !url.IsValid() {
-		err = url.Validate()
+	url, err := domain.NewURL(r.URL)
+
+	if err != nil {
+		validationErrors = append(validationErrors, err)
+	}
+
+	err = url.Validate()
+
+	if err != nil {
 		validationErrors = append(validationErrors, err)
 	}
 
